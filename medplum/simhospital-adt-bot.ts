@@ -23,7 +23,7 @@
 //   GET /fhir/R4/Encounter?identifier=urn:oid:patient-visit-number|<caseId>&status=in-progress&_include=Encounter:patient&_include=Encounter:location&_revinclude:iterate=Coverage:beneficiary&_include:iterate=Coverage:payor
 //   Returns active encounter + patient + current location + insurance coverage + payor.
 
-// Fallback if your server/search setup does not support iterative include:
+// Fallback if the server/search setup does not support iterative include:
 // 1) GET /fhir/R4/Encounter?identifier=urn:oid:patient-visit-number|<caseId>&status=in-progress&_include=Encounter:patient&_include=Encounter:location
 // 2) GET /fhir/R4/Coverage?beneficiary=Patient/<patientResourceId>&_include=Coverage:payor
 
@@ -68,7 +68,9 @@ import type {
 
 // ─── System URIs ─────────────────────────────────────────────────────────────
 // These identifiers are integration-level URI namespaces, not bot-specific IDs.
-// Keep them aligned with the shared/canonical URI set used across your apps,
+// The values below are the current defaults for this spike/bot setup; multi-hospital
+// setups should use source-scoped naming.
+// Keep them aligned with the shared/canonical URI set used across shared apps,
 // pipelines, and downstream services so cross-system lookups stay stable.
 const SYSTEM_MRN = 'urn:oid:patient-mrn';
 const SYSTEM_VISIT = 'urn:oid:patient-visit-number';

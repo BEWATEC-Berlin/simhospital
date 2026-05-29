@@ -125,7 +125,7 @@ GET /fhir/R4/Patient?identifier=<mrnValue>
 
 `Patient/<patientResourceId>` is the Medplum system resource ID. External hospital systems
 typically do not know this ID, so these queries are mainly for internal tools,
-debugging, or follow-up calls after you already resolved a patient in Medplum.
+debugging, or follow-up calls after a patient is already resolved in Medplum.
 
 ```http
 # Direct patient resource lookup
@@ -184,7 +184,7 @@ The table below shows the current defaults used in this spike/bot setup.
 
 For multi-hospital setups, use source-scoped naming (see section below) so
 identifiers stay unique per hospital/source. Keep all URI values aligned with
-your canonical identifier catalog and change them only in a coordinated rollout.
+the canonical identifier catalog and change them only in a coordinated rollout.
 
 | Constant                    | System URI                       | Description            |
 | --------------------------- | -------------------------------- | ---------------------- |
@@ -218,8 +218,8 @@ Implications by deployment model:
   Otherwise, identical case/MRN values from different hospitals can collide.
 - One Medplum server per hospital integration project (current spike setup):
   cross-hospital collisions are naturally isolated by deployment, so simpler
-  generic system URIs can work. Source-scoped URIs are still useful if you may
-  consolidate data later.
+  generic system URIs can work. Source-scoped URIs are still useful if future
+  consolidation is possible.
 
 Recommendation:
 
@@ -247,7 +247,7 @@ This identifier is written as `Location.identifier` with system
 `urn:oid:location-id`, and is also used to find/update existing Location
 resources.
 
-If you change this formula later, consider the migration impact for your
+If the formula changes later, consider the migration impact for the relevant
 project scope:
 
 - Existing Location resources may no longer match new messages
