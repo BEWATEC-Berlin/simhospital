@@ -111,3 +111,10 @@ go build ./cmd/simulator/
 Open the dashboard at http://localhost:8000/simulated-hospital/. Stop with Ctrl-C.
 
 See the full setup guide including MLLP output options: [docs/run-with-go.md](./docs/run-with-go.md).
+
+## Medplum integration
+
+A ready-to-use Medplum bot that converts SimHospital HL7v2 ADT messages into
+FHIR R4 resources (Patient, Location, Encounter, Coverage) is included in the
+[`medplum/`](./medplum/) folder. See [medplum/README.md](./medplum/README.md)
+for deployment instructions and example FHIR queries.

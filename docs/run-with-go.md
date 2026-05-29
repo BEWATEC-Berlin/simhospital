@@ -145,3 +145,12 @@ setup.
 
 The Go toolchain approach bypasses these issues entirely — the source code
 itself is valid Go and builds cleanly with the standard toolchain.
+
+---
+
+## Medplum integration
+
+A Medplum bot that converts SimHospital HL7v2 ADT messages into FHIR R4
+resources is included in the [`medplum/`](../medplum/) folder.
+See [medplum/README.md](../medplum/README.md) for setup, deployment, and
+example FHIR queries.

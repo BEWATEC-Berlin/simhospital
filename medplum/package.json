@@ -1,0 +1,11 @@
+{
+  "name": "simhospital-medplum-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Medplum bot for processing SimHospital ADT HL7v2 messages",
+  "devDependencies": {
+    "@medplum/core": "^5.1.13",
+    "@medplum/fhirtypes": "^5.1.13",
+    "typescript": "^5.4.5"
+  }
+}
