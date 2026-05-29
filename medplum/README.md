@@ -3,6 +3,20 @@
 This folder contains a [Medplum](https://www.medplum.com/) bot that consumes
 HL7v2 ADT messages produced by SimHospital and stores them as FHIR R4 resources.
 
+## Quick navigation
+
+- [What it does](#what-it-does)
+- [Architecture](#architecture)
+- [Files](#files)
+- [Local setup (type-checking / IDE support only)](#local-setup-type-checking--ide-support-only)
+- [Deploying to Medplum](#deploying-to-medplum)
+- [Connecting SimHospital via MLLP](#connecting-simhospital-via-mllp)
+- [Querying the resulting FHIR resources](#querying-the-resulting-fhir-resources)
+- [Identifier modeling](#identifier-modeling)
+- [Location modeling](#location-modeling)
+- [Insurance modeling](#insurance-modeling)
+- [Data minimization](#data-minimization)
+
 ## What it does
 
 The bot receives ADT messages via a Medplum MLLP Agent (TCP listener) and
@@ -153,31 +167,7 @@ reliable than Encounter-by-caseId queries:
 GET /fhir/R4/Patient?identifier=urn:oid:patient-visit-number|<caseId>
 ```
 
-## Insurance field handling
-
-The bot writes insurance data in two places:
-
-- Canonical case insurance in `Coverage` (linked to patient via `Coverage.beneficiary` and payor via `Coverage.payor`)
-- Convenience mirror on `Patient.extension` with URL `urn:insurance-type`
-
-Why the Patient extension exists:
-
-- Fast/simple patient-centric reads (for lightweight UI displays)
-- Easier debugging when opening a single Patient resource
-
-Caveats and implications:
-
-- The Patient extension is a summary convenience value, not the full insurance model
-- A patient can have multiple encounters/cases over time, with different insurance contexts
-- If payer or plan details are needed, `Coverage` is the authoritative source
-
-Recommendation for app logic:
-
-1. Start from the active case (`Encounter` by caseId / visit number).
-2. Use included/revincluded `Coverage` (+ payor Organization) for eligibility and service decisions.
-3. Treat `Patient.extension[urn:insurance-type]` as informational fallback only.
-
-## Identifier systems used
+## Identifier modeling
 
 These URI systems are shared integration contracts, not bot-local constants.
 The table below shows the current defaults used in this spike/bot setup.
@@ -227,7 +217,7 @@ Recommendation:
 2. Query identifiers using `system|value` (not unscoped value) in app logic.
 3. Avoid renaming system URIs frequently; changes require migration planning.
 
-## Location ID construction
+## Location modeling
 
 Location resources are upserted from PV1-3 fields and use a stable composite
 identifier so repeated messages map to the same Location.
@@ -262,3 +252,45 @@ Recommended rollout for formula changes:
 1. Define a project-appropriate canonical rule (aligned with shared URI standards).
 2. Add a backward-compatible lookup path (old ID and new ID) during transition.
 3. Backfill or map historical Locations where needed before removing legacy support.
+
+## Insurance modeling
+
+The bot writes insurance data in two places:
+
+- Canonical case insurance in `Coverage` (linked to patient via `Coverage.beneficiary` and payor via `Coverage.payor`)
+- Convenience mirror on `Patient.extension` with URL `urn:insurance-type`
+
+Why the Patient extension exists:
+
+- Fast/simple patient-centric reads (for lightweight UI displays)
+- Easier debugging when opening a single Patient resource
+
+Caveats and implications:
+
+- The Patient extension is a summary convenience value, not the full insurance model
+- A patient can have multiple encounters/cases over time, with different insurance contexts
+- If payer or plan details are needed, `Coverage` is the authoritative source
+
+Recommendation for app logic:
+
+1. Start from the active case (`Encounter` by caseId / visit number).
+2. Use included/revincluded `Coverage` (+ payor Organization) for eligibility and service decisions.
+3. Treat `Patient.extension[urn:insurance-type]` as informational fallback only.
+
+## Data minimization
+
+Most mapped fields are optional and can be reduced to fit privacy and product
+needs, as long as core linkage for app workflows stays intact.
+
+Typical minimization choices:
+
+- Coverage: keep minimal case insurance context (for example beneficiary + type)
+- Coverage policy number (`subscriberId`): omit when not needed
+- Insurance payor Organization: optional in many implementations; use only when
+  payor-specific logic is required
+- Patient demographics/address: omit or reduce fields that are sensitive and not
+  needed for app behavior
+
+Important: exact minimum fields depend on project profiles and validator rules.
+If profiles require additional elements (for example a payor reference), keep
+those required elements while still minimizing non-essential attributes.
