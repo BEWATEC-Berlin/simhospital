@@ -19,19 +19,19 @@ allergy:
   # Reference:
   # http://hl7-definition.caristix.com:9010/HL7%20v2.3.1/segment/Default.aspx?version=HL7%20v2.3.1&table=0127
   types:
-    - "DA"
-    - "FA"
-    - "MA"
-    - "MC"
+    - 'DA'
+    - 'FA'
+    - 'MA'
+    - 'MC'
   # Reference:
   # http://hl7-definition.caristix.com:9010/HL7%20v2.3.1/segment/Default.aspx?version=HL7%20v2.3.1&table=0128
   severities:
-    - "SV"
-    - "MO"
-    - "MI"
+    - 'SV'
+    - 'MO'
+    - 'MI'
   # SNOMED International coding system. Reference:
   # http://hl7-definition.caristix.com:9010/Default.aspx?version=HL7%20v2.5.1&table=0396
-  coding_system: "SNM3"
+  coding_system: 'SNM3'
 
 #
 # Diagnoses.
@@ -40,12 +40,12 @@ diagnosis:
   # Reference:
   # http://hl7-definition.caristix.com:9010/HL7%20v2.3.1/segment/Default.aspx?version=HL7%20v2.3.1&table=0052
   types:
-    - "A"
-    - "W"
-    - "F"
+    - 'A'
+    - 'W'
+    - 'F'
   # SNOMED International coding system. Reference:
   # http://hl7-definition.caristix.com:9010/Default.aspx?version=HL7%20v2.5.1&table=0396
-  coding_system: "SNM3"
+  coding_system: 'SNM3'
 
 #
 # Document type.
@@ -54,20 +54,20 @@ document:
   # Reference:
   # https://hl7-definition.caristix.com/v2/HL7v2.3.1/Tables/0270
   types:
-  - "AR"
-  - "CD"
-  - "CN"
-  - "DI"
-  - "DS"
-  - "ED"
-  - "HP"
-  - "OP"
-  - "PC"
-  - "PH"
-  - "PN"
-  - "PN"
-  - "SP"
-  - "TS"
+    - 'AR'
+    - 'CD'
+    - 'CN'
+    - 'DI'
+    - 'DS'
+    - 'ED'
+    - 'HP'
+    - 'OP'
+    - 'PC'
+    - 'PH'
+    - 'PN'
+    - 'PN'
+    - 'SP'
+    - 'TS'
 
 #
 # Procedures.
@@ -76,13 +76,13 @@ procedure:
   # Reference:
   # http://hl7-definition.caristix.com:9010/HL7%20v2.3.1/segment/Default.aspx?version=HL7%20v2.3.1&table=0230
   types:
-    - "A"
-    - "P"
-    - "I"
-    - "D"
+    - 'A'
+    - 'P'
+    - 'I'
+    - 'D'
   # SNOMED International coding system. Reference:
   # http://hl7-definition.caristix.com:9010/Default.aspx?version=HL7%20v2.5.1&table=0396
-  coding_system: "SNM3"
+  coding_system: 'SNM3'
 
 #
 # Order Control.
@@ -90,9 +90,9 @@ procedure:
 # Reference:
 # http://hl7-definition.caristix.com:9010/HL7%20v2.3.1/Default.aspx?version=HL7+v2.3.1&table=0119
 order_control:
-  new: "NW"
-  ok: "OK"
-  with_observations: "RE"
+  new: 'NW'
+  ok: 'OK'
+  with_observations: 'RE'
 
 #
 # Result status.
@@ -100,8 +100,8 @@ order_control:
 # Reference:
 # http://hl7-definition.caristix.com:9010/HL7%20v2.3.1/Default.aspx?version=HL7%20v2.5.1&table=0123
 result_status:
-  final: "F"
-  corrected: "C"
+  final: 'F'
+  corrected: 'C'
 
 #
 # Document status
@@ -109,7 +109,7 @@ result_status:
 # Reference
 # https://hl7-definition.caristix.com/v2/HL7v2.5.1/Tables/0271
 document_status:
-  authenticated: "AU"
+  authenticated: 'AU'
 
 #
 # Order status.
@@ -117,8 +117,8 @@ document_status:
 # Reference:
 # http://hl7-definition.caristix.com:9010/HL7%20v2.3.1/Default.aspx?version=HL7%20v2.5.1&table=0038
 order_status:
-  completed: "CM"
-  in_process: "IP"
+  completed: 'CM'
+  in_process: 'IP'
 
 #
 # Patient Class.
@@ -126,18 +126,18 @@ order_status:
 # Reference:
 # http://hl7-definition.caristix.com:9010/Default.aspx?version=HL7%20v2.5.1&table=0004
 patient_class:
-  outpatient: "O"
-  inpatient: "I"
+  outpatient: 'O'
+  inpatient: 'I'
 
 #
 # Patient Account Status.
 #
 # There are no recommended values in HL7; these are user defined.
 patient_account_status:
-  arrived: "ARRIVED"
-  cancelled: "CANCELLED"
-  finished: "FINISHED"
-  planned: "PLANNED"
+  arrived: 'ARRIVED'
+  cancelled: 'CANCELLED'
+  finished: 'FINISHED'
+  planned: 'PLANNED'
 
 #
 # Gender.
@@ -145,8 +145,8 @@ patient_account_status:
 # Reference:
 # http://hl7-definition.caristix.com:9010/HL7%20v2.3.1/segment/PID?version=HL7%20v2.3.1&table=0001
 gender:
-  male: "M"
-  female: "F"
+  male: 'M'
+  female: 'F'
 
 #
 # Abnormal Flags.
@@ -154,12 +154,12 @@ gender:
 # Reference:
 # http://hl7-definition.caristix.com:9010/HL7%20v2.2/table/Default.aspx?version=HL7+v2.2&table=0078
 abnormal_flags:
-  below_low_normal: "L"
-  above_high_normal: "H"
+  below_low_normal: 'L'
+  above_high_normal: 'H'
 
 primary_facility:
-  organization_name: "FAMILY PRACTICE"
-  id_number: "12345"
+  organization_name: 'FAMILY PRACTICE'
+  id_number: '12345'
 
 #
 # Hospital Service (PV1.10 - Hospital Service).
@@ -168,30 +168,65 @@ primary_facility:
 # http://hl7-definition.caristix.com:9010/HL7%20v2.3.1/segment/PV1?version=HL7%20v2.5.1&table=0069
 #
 # The hospital service value can be overridden by the doctor's specialty.
-hospital_service: "MED"
+hospital_service: 'MED'
 
 #
 # Coding System.
 #
 # WinPath is the UK's leading Laboratory Information Management System.
-coding_system: "WinPath"
+coding_system: 'WinPath'
+
+#
+# Insurance (IN1 segment).
+#
+insurance:
+  enabled: true
+  coding_system: 'HL70072'
+  plan_ids:
+    - 'BASIC'
+    - 'PREMIUM'
+    - 'FAMILY'
+  plan_texts:
+    - 'Basic Hospital Plan'
+    - 'Premium Hospital Plan'
+    - 'Family Cover Plan'
+  company_ids:
+    - 'SIMINS001'
+    - 'SIMINS002'
+    - 'SIMINS003'
+  company_names:
+    - 'SimHealth Insurance'
+    - 'Acme Medical Cover'
+    - 'North Star Assurance'
+  group_numbers:
+    - 'G-10001'
+    - 'G-20045'
+    - 'G-30088'
+  plan_types:
+    - 'HMO'
+    - 'PPO'
+    - 'EPO'
+  policy_numbers:
+    - 'POL-00012345'
+    - 'POL-00067890'
+    - 'POL-00054321'
 
 #
 # Mapping from HL7 codes to other value sets.
 #
 mapping:
   fhir:
-    coding_systems: { "SNM3": "http://snomed.info/sct" }
+    coding_systems: { 'SNM3': 'http://snomed.info/sct' }
     # Reference:
     # https://www.hl7.org/fhir/valueset-reaction-event-severity.html
     allergy_severities:
-      severe: ["SV", "SEVERE"]
-      moderate: ["MO", "MODERATE"]
-      mild: ["MI", "MILD"]
+      severe: ['SV', 'SEVERE']
+      moderate: ['MO', 'MODERATE']
+      mild: ['MI', 'MILD']
     # Reference:
     # https://www.hl7.org/fhir/valueset-allergy-intolerance-category.html
     allergy_types:
-      food: ["FA", "FOOD"]
-      medication: ["DA", "MEDICATION"]
-      environment: ["EA", "ENVIRONMENTAL"]
-      biologic: ["BIOLOGIC"]
+      food: ['FA', 'FOOD']
+      medication: ['DA', 'MEDICATION']
+      environment: ['EA', 'ENVIRONMENTAL']
+      biologic: ['BIOLOGIC']

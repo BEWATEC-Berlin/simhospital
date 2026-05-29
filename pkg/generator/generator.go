@@ -107,6 +107,7 @@ func (g Generator) NewPatient(person *ir.Person, doctor *ir.Doctor) *state.Patie
 			// The Hospital Service might be overridden later with the doctor's specialty.
 			HospitalService: g.messageConfig.HospitalService,
 			AttendingDoctor: doctor,
+			Insurance:       g.newInsurance(),
 		},
 		// The code downstream assumes that Orders exists.
 		Orders:    make(map[string]*ir.Order),
@@ -127,6 +128,51 @@ func (g Generator) NewPatient(person *ir.Person, doctor *ir.Doctor) *state.Patie
 		}
 	}
 	return p
+}
+
+func randomOrEmpty(vals []string) string {
+	if len(vals) == 0 {
+		return ""
+	}
+	return vals[rand.Intn(len(vals))]
+}
+
+func randomPairedOrEmpty(left, right []string) (string, string) {
+	if len(left) == 0 && len(right) == 0 {
+		return "", ""
+	}
+	if len(left) == 0 {
+		return "", randomOrEmpty(right)
+	}
+	if len(right) == 0 {
+		return randomOrEmpty(left), ""
+	}
+
+	// Keep paired values stable by using the same random index from the shared range.
+	maxPaired := len(left)
+	if len(right) < maxPaired {
+		maxPaired = len(right)
+	}
+	idx := rand.Intn(maxPaired)
+	return left[idx], right[idx]
+}
+
+func (g Generator) newInsurance() *ir.Insurance {
+	c := g.messageConfig.Insurance
+	if !c.Enabled {
+		return nil
+	}
+	companyID, companyName := randomPairedOrEmpty(c.CompanyIDs, c.CompanyNames)
+	return &ir.Insurance{
+		PlanID:       randomOrEmpty(c.PlanIDs),
+		PlanText:     randomOrEmpty(c.PlanTexts),
+		CodingSystem: c.CodingSystem,
+		CompanyID:    companyID,
+		CompanyName:  companyName,
+		GroupNumber:  randomOrEmpty(c.GroupNumbers),
+		PlanType:     randomOrEmpty(c.PlanTypes),
+		PolicyNumber: randomOrEmpty(c.PolicyNumbers),
+	}
 }
 
 // NewDoctor returns a new doctor based on the Consultant information from the pathway.

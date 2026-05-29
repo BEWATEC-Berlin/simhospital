@@ -269,15 +269,27 @@ type PrimaryFacility struct {
 	ID string
 }
 
+// Insurance represents patient insurance information used in IN1 segments.
+type Insurance struct {
+	PlanID       string
+	PlanText     string
+	CodingSystem string
+	CompanyID    string
+	CompanyName  string
+	GroupNumber  string
+	PlanType     string
+	PolicyNumber string
+}
+
 // PatientInfo represents a patient and related information.
 type PatientInfo struct {
-	Person          *Person
-	Class           string // EMERGENCY / INPATIENT / OUTPATIENT / PREADMIT / RECURRING PATIENT / OBSTETRICS
-	Type            string // values are defined per-trust if this field is used
-	VisitID         uint64
-	HospitalService string
-	AdmitReason     string
-	ReadmissionIndicator  string // R is the only value suggested in the hl7 specification
+	Person               *Person
+	Class                string // EMERGENCY / INPATIENT / OUTPATIENT / PREADMIT / RECURRING PATIENT / OBSTETRICS
+	Type                 string // values are defined per-trust if this field is used
+	VisitID              uint64
+	HospitalService      string
+	AdmitReason          string
+	ReadmissionIndicator string // R is the only value suggested in the hl7 specification
 
 	// Location is the current patient location.
 	Location      *PatientLocation
@@ -307,6 +319,7 @@ type PatientInfo struct {
 	Procedures      []*DiagnosisOrProcedure
 	Encounters      []*Encounter
 	PrimaryFacility *PrimaryFacility
+	Insurance       *Insurance
 	// AdditionalData allows users to enter arbitrary information about a patient's medical record.
 	// It is up to the user to decide what data is stored here.
 	AdditionalData interface{}

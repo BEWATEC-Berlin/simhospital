@@ -21,11 +21,11 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/google/simhospital/pkg/constants"
 	"github.com/google/simhospital/pkg/hl7"
 	"github.com/google/simhospital/pkg/ir"
 	"github.com/google/simhospital/pkg/logging"
+	"github.com/pkg/errors"
 )
 
 // The fields in this block are HL7 message types Simulated Hospital supports.
@@ -167,6 +167,7 @@ const (
 	MRG             = "MRG"
 	DG1             = "DG1"
 	PD1             = "PD1"
+	IN1             = "IN1"
 	PR1             = "PR1"
 	TXA             = "TXA"
 )
@@ -303,6 +304,10 @@ var templates = map[string]*template.Template{
 	PD1: mustParseTemplates(PD1, map[string]string{
 		primFacTemplate: primFacTmpl,
 		PD1:             `PD1|||{{template "PrimFacTmpl" .PrimaryFacility}}|`,
+	}),
+	IN1: mustParseTemplates(IN1, map[string]string{
+		ceTemplate: ceTmpl,
+		IN1:        `IN1|1|{{template "CETmpl" .InsurancePlan}}|{{.CompanyID}}|{{.CompanyName}}||||{{.GroupNumber}}|||||||{{.PlanType}}||||||||||||||||||||{{.PolicyNumber}}`,
 	}),
 	PR1: mustParseTemplates(PR1, map[string]string{
 		ceTemplate:     ceTmpl,
@@ -607,6 +612,13 @@ func BuildAdmissionADTA01(h *HeaderInfo, p *ir.PatientInfo, eventTime time.Time,
 		return nil, errors.Wrap(err, "cannot build PD1 segment")
 	}
 	segments = append(segments, pd1)
+	in1, err := BuildIN1(p.Insurance)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot build IN1 segment")
+	}
+	if in1 != "" {
+		segments = append(segments, in1)
+	}
 	pv1, err := BuildPV1(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot build PV1 segment")
@@ -666,6 +678,13 @@ func BuildTransferADTA02(h *HeaderInfo, p *ir.PatientInfo, eventTime time.Time, 
 		return nil, errors.Wrap(err, "cannot build PD1 segment")
 	}
 	segments = append(segments, pd1)
+	in1, err := BuildIN1(p.Insurance)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot build IN1 segment")
+	}
+	if in1 != "" {
+		segments = append(segments, in1)
+	}
 	pv1, err := BuildPV1(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot build PV1 segment")
@@ -706,6 +725,13 @@ func BuildDischargeADTA03(h *HeaderInfo, p *ir.PatientInfo, eventTime time.Time,
 		return nil, errors.Wrap(err, "cannot build PD1 segment")
 	}
 	segments = append(segments, pd1)
+	in1, err := BuildIN1(p.Insurance)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot build IN1 segment")
+	}
+	if in1 != "" {
+		segments = append(segments, in1)
+	}
 	pv1, err := BuildPV1(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot build PV1 segment")
@@ -753,6 +779,13 @@ func BuildRegistrationADTA04(h *HeaderInfo, p *ir.PatientInfo, eventTime time.Ti
 		return nil, errors.Wrap(err, "cannot build PD1 segment")
 	}
 	segments = append(segments, pd1)
+	in1, err := BuildIN1(p.Insurance)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot build IN1 segment")
+	}
+	if in1 != "" {
+		segments = append(segments, in1)
+	}
 	pv1, err := BuildPV1(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot build PV1 segment")
@@ -806,6 +839,13 @@ func BuildPreAdmitADTA05(h *HeaderInfo, p *ir.PatientInfo, eventTime time.Time, 
 		return nil, errors.Wrap(err, "cannot build PD1 segment")
 	}
 	segments = append(segments, pd1)
+	in1, err := BuildIN1(p.Insurance)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot build IN1 segment")
+	}
+	if in1 != "" {
+		segments = append(segments, in1)
+	}
 	pv1, err := BuildPV1(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot build PV1 segment")
@@ -866,7 +906,14 @@ func BuildUpdatePatientADTA08(h *HeaderInfo, p *ir.PatientInfo, includeFullPV1 b
 		return nil, errors.Wrap(err, "cannot build PID segment")
 	}
 	segments = append(segments, pid)
-	if (includeFullPV1) {
+	in1, err := BuildIN1(p.Insurance)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot build IN1 segment")
+	}
+	if in1 != "" {
+		segments = append(segments, in1)
+	}
+	if includeFullPV1 {
 		pv1, err := BuildPV1(p)
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot build PV1 segment")
@@ -1102,6 +1149,13 @@ func BuildAddPersonADTA28(h *HeaderInfo, p *ir.PatientInfo, eventTime time.Time,
 		return nil, errors.Wrap(err, "cannot build PD1 segment")
 	}
 	segments = append(segments, pd1)
+	in1, err := BuildIN1(p.Insurance)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot build IN1 segment")
+	}
+	if in1 != "" {
+		segments = append(segments, in1)
+	}
 	segments = append(segments, BuildPseudoPV1())
 	for id, al := range p.Allergies {
 		al1, err := BuildAL1(id, al)
@@ -1139,6 +1193,13 @@ func BuildUpdatePersonADTA31(h *HeaderInfo, p *ir.PatientInfo, eventTime time.Ti
 		return nil, errors.Wrap(err, "cannot build PID segment")
 	}
 	segments = append(segments, pid)
+	in1, err := BuildIN1(p.Insurance)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot build IN1 segment")
+	}
+	if in1 != "" {
+		segments = append(segments, in1)
+	}
 	segments = append(segments, BuildPseudoPV1())
 	for id, al := range p.Allergies {
 		al1, err := BuildAL1(id, al)
@@ -1760,6 +1821,28 @@ func BuildPD1(p *ir.PatientInfo) (string, error) {
 	return executeTemplate(templates[PD1], struct {
 		*ir.PrimaryFacility
 	}{p.PrimaryFacility})
+}
+
+// BuildIN1 builds and returns an optional HL7 IN1 segment.
+func BuildIN1(i *ir.Insurance) (string, error) {
+	if i == nil {
+		return "", nil
+	}
+	return executeTemplate(templates[IN1], struct {
+		InsurancePlan *ir.CodedElement
+		CompanyID     string
+		CompanyName   string
+		GroupNumber   string
+		PlanType      string
+		PolicyNumber  string
+	}{
+		InsurancePlan: &ir.CodedElement{ID: i.PlanID, Text: i.PlanText, CodingSystem: i.CodingSystem},
+		CompanyID:     i.CompanyID,
+		CompanyName:   i.CompanyName,
+		GroupNumber:   i.GroupNumber,
+		PlanType:      i.PlanType,
+		PolicyNumber:  i.PolicyNumber,
+	})
 }
 
 // BuildMRG builds and returns a HL7 MRG segment.

@@ -17,9 +17,9 @@ package config
 import (
 	"context"
 
+	"github.com/google/simhospital/pkg/files"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
-	"github.com/google/simhospital/pkg/files"
 )
 
 // HL7Config is the configuration for HL7 messages where the values are important for HL7 compliance or specific uses of the HL7 standard.
@@ -62,7 +62,32 @@ type HL7Config struct {
 	// It is used to construct the Coded Element.
 	CodingSystem string `yaml:"coding_system"`
 
+	// Insurance controls random insurance data used to build IN1 segments.
+	Insurance HL7Insurance `yaml:"insurance"`
+
 	Mapping CodeMapping
+}
+
+// HL7Insurance contains values used to build IN1 segments.
+type HL7Insurance struct {
+	// Enabled controls whether IN1 segments are emitted.
+	Enabled bool
+	// PlanIDs are the values used in IN1.2.1 Insurance Plan ID.
+	PlanIDs []string `yaml:"plan_ids"`
+	// PlanTexts are the values used in IN1.2.2 Insurance Plan text.
+	PlanTexts []string `yaml:"plan_texts"`
+	// CodingSystem is used in IN1.2.3 Insurance Plan coding system.
+	CodingSystem string `yaml:"coding_system"`
+	// CompanyIDs are the values used in IN1.3 Insurance Company ID.
+	CompanyIDs []string `yaml:"company_ids"`
+	// CompanyNames are the values used in IN1.4.1 Insurance Company Name.
+	CompanyNames []string `yaml:"company_names"`
+	// GroupNumbers are the values used in IN1.8 Group Number.
+	GroupNumbers []string `yaml:"group_numbers"`
+	// PlanTypes are the values used in IN1.15 Plan Type.
+	PlanTypes []string `yaml:"plan_types"`
+	// PolicyNumbers are the values used in IN1.36 Policy Number.
+	PolicyNumbers []string `yaml:"policy_numbers"`
 }
 
 // Header contains the configuration of the Message Header (MSH segment).
