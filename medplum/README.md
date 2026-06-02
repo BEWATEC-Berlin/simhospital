@@ -9,6 +9,7 @@ HL7v2 ADT messages produced by SimHospital and stores them as FHIR R4 resources.
 - [Architecture](#architecture)
 - [Files](#files)
 - [Local setup (type-checking / IDE support only)](#local-setup-type-checking--ide-support-only)
+- [Local Medplum Agent + Bot HOWTO](#local-medplum-agent--bot-howto)
 - [Deploying to Medplum](#deploying-to-medplum)
 - [Connecting SimHospital via MLLP](#connecting-simhospital-via-mllp)
 - [Querying the resulting FHIR resources](#querying-the-resulting-fhir-resources)
@@ -73,6 +74,11 @@ To verify the file is type-correct:
 npx tsc --noEmit
 ```
 
+## Local Medplum Agent + Bot HOWTO
+
+For a step-by-step guide to run Medplum locally and configure an Agent + Bot for
+this SimHospital flow, see [LOCAL-DEV-HOWTO.md](./LOCAL-DEV-HOWTO.md).
+
 ## Deploying to Medplum
 
 1. Open the [Medplum App](https://app.medplum.com/) and navigate to **Bots**.
@@ -93,6 +99,13 @@ SimHospital pointing at it:
 
 See [docs/run-with-go.md](../docs/run-with-go.md) for full MLLP options
 (keep-alive reconnect, file buffering, etc.).
+
+For interactive test control, use the SimHospital dashboard documented in
+[docs/dashboard.md](../docs/dashboard.md) to adjust messages per hour and push
+patient pathways.
+
+Direct local dashboard URL:
+http://localhost:8000/simulated-hospital/
 
 ## Querying the resulting FHIR resources
 
