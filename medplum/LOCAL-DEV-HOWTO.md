@@ -6,6 +6,17 @@ prepare a project to use an Agent and a Bot with SimHospital HL7 test traffic.
 It intentionally keeps installation short and points to the official Medplum
 contributor docs.
 
+## Quick navigation
+
+- [Official references](#official-references)
+- [1) Install and run Medplum locally (short version)](#1-install-and-run-medplum-locally-short-version)
+- [2) Create the required Medplum resources (UI method)](#2-create-the-required-medplum-resources-ui-method)
+- [3) Run an Agent host locally](#3-run-an-agent-host-locally)
+- [4) Bot deployment and updates with CLI](#4-bot-deployment-and-updates-with-cli)
+- [5) Optional: Create Endpoint/Agent using CLI (FHIR JSON + POST)](#5-optional-create-endpointagent-using-cli-fhir-json--post)
+- [6) End-to-end test](#6-end-to-end-test)
+- [Troubleshooting quick notes](#troubleshooting-quick-notes)
+
 ## Official references
 
 - Local dev setup: https://www.medplum.com/docs/contributing/local-dev-setup
@@ -180,22 +191,35 @@ For local dev, Option A is usually easiest.
 
 ## 4) Bot deployment and updates with CLI
 
-You can manage bot save/deploy from CLI.
+For a full CLI-first on-prem setup from an external admin machine, including
+ClientApplication, Bot, Endpoint, Agent, hospital host configuration, and app
+read access, see [ON-PREM-CLI-HOWTO.md](./ON-PREM-CLI-HOWTO.md).
 
-1. Install CLI
+For local dev, do this CLI setup once first:
+
+1. Install Medplum CLI
 
 ```bash
 npm install --global @medplum/cli
 ```
 
-2. Login
+2. Set local Medplum base URL
+
+```bash
+export MEDPLUM_BASE_URL=http://localhost:8103
+```
+
+3. Authenticate and verify context
 
 ```bash
 medplum login
 medplum whoami
+medplum project current
 ```
 
-3. Create `medplum.config.json` in your bot workspace and map your existing Bot
+Then use the minimal bot save/deploy flow:
+
+1. Create `medplum.config.json` in your bot workspace and map your existing Bot
    ID to source files:
 
 ```json
@@ -210,7 +234,7 @@ medplum whoami
 }
 ```
 
-4. Save and deploy
+2. Save and deploy
 
 ```bash
 npx medplum bot save simhospital-adt-bot
@@ -270,8 +294,9 @@ medplum post Agent '{
 }'
 ```
 
-Tip: Creating the ClientApplication is often easier in the UI because you can
-copy credentials immediately.
+For the complete on-prem provisioning flow, including how to create the client
+credentials and how downstream apps access stored resources, see
+[ON-PREM-CLI-HOWTO.md](./ON-PREM-CLI-HOWTO.md).
 
 ## 6) End-to-end test
 
