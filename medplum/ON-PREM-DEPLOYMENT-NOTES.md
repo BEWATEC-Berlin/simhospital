@@ -11,11 +11,12 @@ Medplum-based integration stack to an on-prem hospital site.
 - [What should not be shared with the hospital environment](#what-should-not-be-shared-with-the-hospital-environment)
 - [Runtime topology example](#runtime-topology-example)
 - [Docker Compose deployment option](#docker-compose-deployment-option)
-- [Agent placement options](#agent-placement-options)
+- [Agent placement note](#agent-placement-note)
 - [Windows hospital environments](#windows-hospital-environments)
 - [Persistence and backup expectations](#persistence-and-backup-expectations)
 - [Security and networking considerations](#security-and-networking-considerations)
-- [What this means for our spike conclusion](#what-this-means-for-our-spike-conclusion)
+- [Patient-facing app access boundary](#patient-facing-app-access-boundary)
+- [Deployment takeaway](#deployment-takeaway)
 - [Recommended next step](#recommended-next-step)
 
 ## Deployment question
@@ -32,27 +33,45 @@ runtime dependencies already present in the hospital environment.
 
 ## On-prem deployment model
 
-The Medplum platform stack (server, app, database, cache) runs as a single
-deployment unit via Docker Compose. The agent is a separate decision point.
+Medplum commonly uses an on-prem agent that connects to a Medplum server run
+outside the hospital environment.
+
+For this project, an additional deployment model is important: run the Medplum
+server and data stack in a hospital-controlled environment as well, so the data
+remains on-prem or is only exposed through controlled application access.
+
+That hospital-controlled model can be packaged as a single Docker Compose
+deployment including server, database, cache, and agent, with app added when
+needed.
 
 Core platform stack via Docker Compose:
 
 1. Medplum server (Node.js app)
-2. Medplum web app (Node.js app)
+2. Optional: Medplum web app (Node.js app)
 3. PostgreSQL (container)
 4. Redis (container)
 5. Optional: reverse proxy / TLS termination (container)
+6. Medplum Agent (container)
 
-Agent placement options:
+Admin access options when `medplum-app` is omitted:
 
-- In the same Compose file as a sixth service (simpler for hospital IT)
-- On a separate dedicated host or container (cleaner network isolation)
+- Use Medplum CLI from an admin workstation
+- Use API-based admin automation from trusted tooling
+- Use a centrally hosted Medplum web app (outside the hospital site) only if
+  secure network access and access-control policy permit it
+- Outside-hospital administration is possible through a controlled remote
+  access path (for example VPN/private connectivity or restricted HTTPS ingress
+  with strong authentication and allow-listing)
 
 Separation of concerns:
 
-- All Medplum platform pieces run together in one Compose file
+- In the hospital-controlled model, all Medplum pieces run together in one
+  Compose file
 - Hospital source systems send HL7 only to the agent
 - Downstream apps talk only to Medplum FHIR APIs
+
+If hospital IT or infrastructure policy requires it, the agent can also run
+separately while keeping the same Bot and FHIR flow.
 
 This gives a clean boundary between:
 
@@ -107,14 +126,12 @@ A practical hospital-site deployment can look like this:
 1. `postgres` service with persistent volume
 2. `redis` service with persistent volume
 3. `medplum-server` service
-4. `medplum-app` service
+4. optional `medplum-app` service
 5. `reverse-proxy` service for HTTPS and routing (optional but recommended)
 6. `medplum-agent` service (optional: can run here or separately)
 
-**Agent placement (hospital choice):**
-
-- Option A: Include agent in the same Compose file (one deploy, one host)
-- Option B: Run agent separately or on a different host (cleaner isolation)
+If required by hospital infrastructure rules, the agent can instead run on a
+separate host or container.
 
 Traffic flow:
 
@@ -142,7 +159,7 @@ services:
   postgres: # data persistence
   redis: # caching and queues
   server: # Medplum FHIR API
-  app: # Medplum web UI
+  app: # optional Medplum web UI
   reverse-proxy: # TLS termination, optional
   agent: # MLLP listener, optional (can be separate)
 ```
@@ -150,58 +167,16 @@ services:
 For larger or more complex hospital rollouts, the same stack design can later
 move to Kubernetes or another orchestrator without architectural changes.
 
-## Agent placement options
+## Agent placement note
 
-The hospital chooses where the agent runs based on their network and approval
-process.
+This note focuses on the all-in-one Compose model because it matches the
+hospital-controlled deployment needed here.
 
-### Option A: Agent in the same Compose stack
+If hospital IT requires a separate interface component, the agent can run on a
+dedicated host or in a separate container while the rest of the Medplum stack
+stays unchanged.
 
-**Use when:**
-
-- Docker networking is straightforward for inbound MLLP
-- Hospital IT wants one simple deployment: `docker-compose up`
-- no network/firewall complications for the agent container
-
-**Pros:**
-
-- all pieces in one file and one command
-- easier upgrades (one image set)
-- simple for pilot/smaller deployments
-
-**Cons:**
-
-- agent and platform scale together (may not be ideal if agent load differs)
-- single host failure takes everything down
-
-### Option B: Agent on a separate host or VM
-
-**Use when:**
-
-- Hospital IT wants clear separation: interface listener on its own machine
-- the HIS network segment or firewall approval requires it
-- agent load or uptime requirements differ from the platform
-
-**Pros:**
-
-- cleaner network isolation
-- often easier for hospital IT and network teams to approve
-- agent can be restarted independently of the platform
-
-**Cons:**
-
-- two deployment units to manage
-- slightly more complex ops workflow
-
-**Decision guidance:** Do not force a single default. Pick the agent placement based
-on hospital network policy and operations model:
-
-- Prefer Option A when one-host deployment and simpler operations are the top
-  priority
-- Prefer Option B when network segregation, firewall controls, or independent
-  agent lifecycle are required
-
-Either way, the agent remains the only system directly exposed to hospital HL7
+In all cases, the agent remains the only component exposed to hospital HL7
 senders.
 
 ## Windows hospital environments
@@ -211,20 +186,17 @@ same architecture but adjust runtime placement:
 
 ### Common production pattern
 
-1. Run the Medplum platform stack (server/app/postgres/redis/reverse-proxy) on
-   a Linux host or Linux VM using Docker Compose
-2. Run the agent either:
-   - in that same Linux Compose stack, or
-   - on a separate Windows host using the official Medplum Agent installer
-     (MSI/executable), entering required base URL, client ID, client secret,
-     and agent ID during install (or using equivalent run-time env
-     vars/parameters)
+1. Run the full Medplum stack in containers, typically on a Linux host or Linux
+   VM using Docker Compose, when the server and data also need to stay in a
+   hospital-controlled environment
+2. If required, run the agent separately on Windows using the official Medplum
+   Agent installer (MSI/executable)
 
 Why this pattern is common:
 
-- Medplum platform dependencies are most predictable in Linux container runtime
-- Hospital IT can still keep interface connectivity close to Windows-based HIS
-  segments by placing the agent on Windows if needed
+- Medplum platform dependencies are predictable in a Linux container runtime
+- Windows-based hospital environments can still keep the interface endpoint
+  close to local systems when needed
 
 ### Windows-specific operational notes
 
@@ -232,6 +204,8 @@ Why this pattern is common:
   production-friendly service installation and startup behavior
 - The installer creates a Windows service named "Medplum Agent"
 - Avoid using Docker Desktop as a production runtime
+- Other production-friendly choices can include a Linux VM running Docker
+  Compose or another hospital-approved container platform/runtime
 - Keep MLLP ingress only on the agent endpoint (Windows or Linux)
 - Keep postgres and redis internal to the platform network
 - Use the same bot code and FHIR model regardless of whether the agent runs on
@@ -285,11 +259,33 @@ Common access model:
 - downstream apps never read raw HL7
 - project-specific access policies should limit app/client scope where possible
 
-## What this means for our spike conclusion
+If a centrally hosted UI is used to administer multiple hospital projects,
+restrict access with organization policy controls (for example VPN/private
+network paths, IP allow-lists, and role-based client credentials).
 
-The spike suggests the following deployment strategy is realistic:
+## Patient-facing app access boundary
 
-1. Use Medplum as the on-prem normalization and persistence layer
+For patient apps, a useful boundary model is:
+
+1. Keep Medplum runtime and data in a hospital-controlled environment.
+2. Expose only a controlled app/API entrypoint for patient access.
+3. Avoid broad direct FHIR access from mobile apps.
+4. Return only app-relevant admission context (for example current bed location, insurance type, only needed user and case data).
+
+Authentication/authorization patterns can include:
+
+- Standard user auth (for example Keycloak) with project-scoped roles.
+- Short-lived, signed code/token exchange flows for simplified login journeys.
+- Strict token lifetime, replay protection, and scope limits.
+
+For outside-hospital device access, keep the same boundary and enforce secure
+remote controls (TLS, strong auth, allow-listing, and policy-based access).
+
+## Deployment takeaway
+
+This note supports the following deployment approach:
+
+1. Use Medplum as the normalization layer and as a persistence layer for app-relevant integration data in a hospital-controlled environment
 2. Run Medplum and its dependencies in isolated containers
 3. Use project-specific bots to normalize hospital-specific HL7 differences
 4. Let downstream apps consume only normalized FHIR resources from Medplum
