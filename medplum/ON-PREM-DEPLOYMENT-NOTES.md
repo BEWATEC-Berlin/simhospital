@@ -302,3 +302,5 @@ For implementation planning, define a first deployment package containing:
 3. environment/config files for server/app
 4. agent deployment decision: container vs dedicated host
 5. backup, logging, and TLS handling
+6. a basic ready-to-use setup script/template to provision core resources
+   (client, bot, endpoint, agent) and baseline configuration

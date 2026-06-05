@@ -27,35 +27,44 @@
 
 **Definition of Done result**
 
-1. Ingestion feasibility
+1. **Ingestion feasibility**
    Status: Achieved.
-   - HL7 ADT messages are ingested through Medplum Agent over MLLP.
-   - Bot logic transforms and persists via Medplum FHIR APIs.
-   - No manual database edits were needed.
 
-2. Field coverage
+- HL7 ADT messages are ingested through Medplum Agent over MLLP.
+- Bot logic transforms and persists via Medplum FHIR APIs.
+- No manual database edits were needed.
+
+2. **Field coverage**
    Status: Achieved at spike depth (with known variance points).
    Mapped and persisted:
-   - Patient ID/MRN, case/visit identifier, name, DOB, gender.
-   - Address fields when present in HL7.
-   - Location context (building/department/room/bed) as provided.
-   - Insurance/public-private best-effort when IN1 content is present.
-     Known unstable/missing-by-sender areas:
-   - Where case/visit number is populated.
-   - Which PV1 location subfield carries department vs facility semantics.
-   - Insurance coding/completeness and private/public signaling.
 
-3. Idempotency approach
+- Patient ID/MRN, case/visit identifier, name, DOB, gender.
+- Address fields when present in HL7.
+- Location context (building/department/room/bed) as provided.
+- Insurance/public-private best-effort when IN1 content is present.
+  Known unstable/missing-by-sender areas:
+- Where case/visit number is populated.
+- Location mapping can vary across PV1 subfields (room/bed are usually stable).
+- Insurance coding/completeness and private/public signaling.
+
+3. **Idempotency approach**
    Status: Defined.
-   - Patient upsert by MRN identifier system/value.
-   - Encounter upsert by visit/case identifier system/value.
-   - Location upsert by deterministic location identifier derived from PV1 components.
-   - Coverage/payor upsert by deterministic insurance/payor keys.
-   - Rule: identifier-based upserts only (no blind creates).
+   Identifier matching uses FHIR `system|value` format to keep upserts
+   deterministic and avoid ambiguous cross-system matches.
 
-4. FHIR read-back works
+- Patient upsert by MRN identifier system/value.
+- Encounter upsert by visit/case identifier system/value.
+- Location upsert by deterministic location identifier derived from PV1 components.
+- Coverage/payor upsert by deterministic insurance/payor keys.
+- Rule: identifier-based upserts only (no blind creates).
+  For multi-hospital or shared-host deployments, use project-scoped
+  identifier systems to prevent collisions across projects, for example:
+  `urn:oid:<HospitalProjectNameOrId>-patient-visit-number|<caseId>`.
+
+4. **FHIR read-back works**
    Status: Achieved.
-   Example query 1 (active encounter + patient + location):
+
+Example query 1 (active encounter + patient + location):
 
 ```http
 GET /fhir/R4/Encounter?identifier=urn:oid:patient-visit-number|CASE123&status=in-progress&_include=Encounter:patient&_include=Encounter:location
@@ -73,10 +82,26 @@ Example query 3 (patient by MRN):
 GET /fhir/R4/Patient?identifier=urn:oid:patient-mrn|MRN12345
 ```
 
-5. Portability notes (design guidance for future HIS providers)
-   - Case number location in HL7 can vary by hospital/vendor profile.
-   - Location semantics can be distributed differently across PV1 subfields.
-   - Insurance/private-public representation can differ or be incomplete.
+5. **Portability notes (design guidance for future HIS providers)**
+
+- Case number location in HL7 can vary by hospital/vendor profile.
+- Location semantics can be distributed differently across PV1 subfields.
+- Insurance/private-public representation can differ or be incomplete.
+
+**Follow-up considerations (not primary spike scope)**
+
+- Data lifecycle handling:
+  define retention and cleanup rules for patient-context data after discharge
+  (for example when Encounter is finished and related operational data is no
+  longer needed).
+- Access handling for app users:
+  add stricter project-specific access policies so users can only read their own
+  allowed context data.
+- Security hardening:
+  define audit, token lifetime, and endpoint exposure rules for production use.
+- Operational bootstrap:
+  create a basic ready-to-use setup script/template that provisions core
+  resources (client, bot, endpoint, agent) and baseline configuration.
 
 **Design conclusion for upcoming HIS interface work**
 
